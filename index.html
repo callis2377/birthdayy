@@ -1,0 +1,241 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For Ali</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#2e0505; --card:#0b0b0b; --accent:#c81e1e; --muted:#36475f; --glass:rgba(109, 32, 32, 0.03);}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--bg);color:#fff}
+    .center{display:flex;align-items:center;justify-content:center;height:100vh;padding:20px}
+    .card{width:980px;max-width:100%;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+    h1{font-family:Playfair Display;margin:0;color:var(--accent)}
+
+    /* --- PAGE SECTIONS --- */
+    .page{display:none}
+    .page.active{display:block}
+
+    /* --- Game (password) --- */
+    .game-box{display:flex;gap:18px;align-items:center;justify-content:space-between}
+    .game-left{flex:1;padding:18px}
+    .pad{background:rgba(255,255,255,0.02);padding:16px;border-radius:10px}
+    input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff}
+    .btn{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .btn.primary{background:var(--accent);color:#fff}
+
+    /* --- Confetti canvas & balloons --- */
+    #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+    .balloon{position:absolute;width:36px;height:48px;border-radius:50% 50% 50% 50%;transform-origin:center bottom}
+
+    /* --- Gift page --- */
+    .gift-area{display:flex;align-items:center;justify-content:center;padding:26px}
+    .present{width:280px;height:220px;background:linear-gradient(180deg,#111,#0a0a0a);border-radius:12px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .ribbonV{position:absolute;width:34px;height:220px;background:var(--accent);left:calc(50% - 17px);top:0}
+    .ribbonH{position:absolute;height:34px;width:280px;background:var(--accent);top:calc(50% - 17px);left:0}
+    .present.exploded{transform:scale(0.98);opacity:0}
+    .flowers{display:none;position:relative}
+    .flowers.show{display:block;animation:flowersIn 700ms ease-out}
+    @keyframes flowersIn{from{transform:translateY(40px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+
+    /* --- Letter --- */
+    .letter-box{background:rgba(255,255,255,0.02);padding:18px;border-radius:10px;max-width:720px;margin:0 auto}
+    pre.letter{white-space:pre-wrap;font-family:Playfair Display;font-size:16px;line-height:1.6}
+
+    /* --- Ending --- */
+    .final{display:flex;align-items:center;justify-content:center;height:80vh;background:#000;color:#000}
+    .final h2{color:var(--accent);font-size:36px}
+
+    /* small utilities */
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .small{font-size:13px;color:var(--muted)}
+    .hide{display:none}
+
+  </style>
+</head>
+<body>
+  <div class="center">
+    <div class="card">
+      <div class="topbar">
+        <div><h1>For Ali</h1><div class="small">A special surprise for you.</div></div>
+        <div class="small">Callis</div>
+      </div>
+
+      <!-- SECTION 1: PASSWORD GAME -->
+      <section id="page-game" class="page active">
+        <div class="game-box">
+          <div class="game-left pad">
+            <h2>Guess the password</h2>
+            <p class="small">Hint: It's a very special date... format <em>DD/MM/YYYY</em></p>
+            <input id="pwdInput" type="text" placeholder="Enter password (e.g. 07/07/2009)" />
+            <div style="height:12px"></div>
+            <div style="display:flex;gap:8px"><button id="tryBtn" class="btn primary">Submit</button><button id="hintBtn" class="btn">Show Hint</button></div>
+            <div id="msg" style="margin-top:12px;color:#ffdddd"></div>
+          </div>
+          <div style="width:300px" class="pad">
+            <h3>Game rules</h3>
+            <ol style="padding-left:18px">
+              <li>Masukkan tanggal spesial sebagai password.</li>
+              <li>Jika benar, pintu kejutan akan terbuka.</li>
+              <li>Kamu bisa mencoba beberapa kali sampai berhasil.</li>
+            </ol>
+            <div style="margin-top:10px" class="small">Good luck Ali! </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: HAPPY BIRTHDAY (popup + confetti + balloons) -->
+      <section id="page-hb" class="page">
+        <div style="text-align:center;padding:30px">
+          <h2 style="font-size:36px;color:var(--accent)">Happy Birthday, Ali!</h2>
+          <p class="small">(This appears as a popup — click to reveal your gift)</p>
+          <button id="openHB" class="btn primary">Open your surprise</button>
+        </div>
+      </section>
+
+      <!-- SECTION 3: GIFT -->
+      <section id="page-gift" class="page">
+        <div class="gift-area">
+          <div class="present" id="present">
+            <div class="ribbonV"></div>
+            <div class="ribbonH"></div>
+            <div style="position:relative;z-index:2;color:#fff;font-weight:700">Click the present</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:12px;color:var(--muted)">When the present explodes, you'll get....</div>
+        <div id="explodedContent" class="flowers hide" style="text-align:center;margin-top:18px">
+          <div style="font-weight:700;margin-bottom:8px">Surprise!</div>
+          <img src="rose.jpg" alt="flowers" style="width:220px;border-radius:8px;display:block;margin:0 auto">
+          <div style="margin-top:12px"><button id="openLetterBtn" class="btn">Open Letter</button></div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: LETTER -->
+      <section id="page-letter" class="page">
+        <div style="padding:18px">
+          <div class="letter-box">
+            <pre class="letter">Dearest Ali,
+
+Happy 17th Birthday! Seventeen;wow! It truly feels like a huge milestone, the perfect age where life starts opening up with endless possibilities.
+ I sincerely hope this year brings you so much happiness, fun, and success in everything you chase. Please enjoy every moment of this exciting time.
+
+You know, over the last two years, you’ve become one of the most significant people in my life. The connection we share,all the late-night talks, the silly jokes, and the easy understanding;means the world to me. Thank you for filling a part of my story with such unique and special memories.
+
+As you step into this next year, I want you to know that I am rooting for you, always. 
+
+Go chase your biggest dreams. Focus on your growth, your future, and everything you want to achieve. And hey, sometimes growing up means making changes and clearing paths to make space for what's next. I hope we both find 
+exactly what we are looking for.
+Have the most spectacular birthday celebrating you. 
+You deserve the best. 
+
+All the best, 
+R. Callista Z.
+</pre>
+          </div>
+          <div style="text-align:center;margin-top:12px"><button id="endBtn" class="btn primary">End</button></div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: FINAL -->
+      <section id="page-final" class="page">
+        <div style="height:220px;display:flex;align-items:center;justify-content:center;background:#000;border-radius:8px">
+          <h2 style="color:#c81e1e">Thank you for everything</h2>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Confetti canvas -->
+  <canvas id="confetti"></canvas>
+
+  <!-- Optional: embedded YouTube (user can press play) -->
+  <div id="ytHolder" style="position:fixed;right:18px;bottom:18px;z-index:80">
+    <iframe id="ytPlayer" width="280" height="158" src="https://www.youtube.com/embed/r22AG0WKV1M?rel=0&showinfo=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+
+  <script>
+    // Elements
+    const pageGame = document.getElementById('page-game');
+    const pageHB = document.getElementById('page-hb');
+    const pageGift = document.getElementById('page-gift');
+    const pageLetter = document.getElementById('page-letter');
+    const pageFinal = document.getElementById('page-final');
+
+    const tryBtn = document.getElementById('tryBtn');
+    const pwdInput = document.getElementById('pwdInput');
+    const msg = document.getElementById('msg');
+    const hintBtn = document.getElementById('hintBtn');
+
+    const openHB = document.getElementById('openHB');
+    const confettiCanvas = document.getElementById('confetti');
+
+    const present = document.getElementById('present');
+    const explodedContent = document.getElementById('explodedContent');
+    const openLetterBtn = document.getElementById('openLetterBtn');
+    const endBtn = document.getElementById('endBtn');
+
+    // password (accept formats)
+    const validPasswords = ['12/12/2008','12-12-2008','12122008'];
+
+    tryBtn.addEventListener('click', ()=>{
+      const v = pwdInput.value.trim();
+      if(validPasswords.includes(v)){
+        goTo(pageHB);
+        // slight popup effect: open modal style
+        setTimeout(()=>{ openHB.click(); }, 700);
+      } else {
+        msg.textContent = 'Password salah. Coba lagi.';
+      }
+    });
+
+    hintBtn.addEventListener('click', ()=>{ alert('Hint: DD/MM/YYYY. Think of the date you mentioned earlier.'); });
+
+    function goTo(el){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); el.classList.add('active'); }
+
+    // CONFETTI basic
+    const c = confettiCanvas; const ctx = c.getContext('2d');
+    let W = c.width = innerWidth, H = c.height = innerHeight;
+    addEventListener('resize', ()=>{ W = c.width = innerWidth; H = c.height = innerHeight; });
+    function random(min,max){return Math.random()*(max-min)+min}
+    class P{ constructor(){ this.x=random(0,W); this.y=random(-H,0); this.w=random(6,14); this.h=random(8,18); this.vx=random(-1.4,1.4); this.vy=random(1,4); this.c = `hsl(${~~random(0,360)} 80% 60%)`; this.rot=random(0,360); this.rv=random(-6,6);} update(){ this.x+=this.vx; this.y+=this.vy; this.rot+=this.rv; if(this.y>H+30) this.reset(); } reset(){ this.x=random(0,W); this.y=random(-H,0); this.vx=random(-1.4,1.4); this.vy=random(1,4); }
+    draw(ctx){ ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.rot*Math.PI/180); ctx.fillStyle=this.c; ctx.fillRect(-this.w/2,-this.h/2,this.w,this.h); ctx.restore(); }}
+    let parts=[];
+    function startConfetti(dur=3000){ parts = Array.from({length:120}, ()=>new P()); let t0=performance.now(); function loop(now){ ctx.clearRect(0,0,W,H); parts.forEach(p=>{ p.update(); p.draw(ctx); }); if(now-t0<dur) requestAnimationFrame(loop); else{ parts=[]; ctx.clearRect(0,0,W,H); }} requestAnimationFrame(loop); }
+
+    // BALLOONS simple (CSS-free — just DOM elements)
+    function makeBalloon(x,y,color){ const b=document.createElement('div'); b.className='balloon'; b.style.left=x+'px'; b.style.top=y+'px'; b.style.background=color; b.style.width='46px'; b.style.height='60px'; b.style.borderRadius='50%'; b.style.opacity=0; b.style.transition='transform 1200ms ease-out, opacity 600ms'; document.body.appendChild(b); setTimeout(()=>{ b.style.transform='translateY(-30px)'; b.style.opacity=1; },50); setTimeout(()=>{ b.style.opacity=0; b.remove(); },3600); }
+
+    openHB.addEventListener('click', ()=>{
+      // popup simulated by confetti + balloons then show birthday content
+      startConfetti(4000);
+      for(let i=0;i<6;i++) setTimeout(()=>{ makeBalloon(80 + i*80, 300 + (i%2)*20, ['#ff6b9a','#f59e0b','#60a5fa','#f43f5e','#a78bfa'][i%5]); }, i*300);
+      // after a short delay, show gift button / next page
+      setTimeout(()=>{ goTo(pageGift); }, 1800);
+    });
+
+    // Present explosion
+    present.addEventListener('click', ()=>{
+      present.classList.add('exploded');
+      setTimeout(()=>{ present.style.display='none'; explodedContent.classList.remove('hide'); explodedContent.classList.add('show'); startConfetti(1200); }, 350);
+    });
+
+    openLetterBtn.addEventListener('click', ()=>{ goTo(pageLetter); startConfetti(900); });
+
+    endBtn.addEventListener('click', ()=>{ goTo(pageFinal); // style final
+      document.getElementById('page-final').style.background='#000'; document.querySelector('#page-final h2').style.color='var(--accent)';
+    });
+
+    // allow enter key in input
+    pwdInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') tryBtn.click(); });
+
+    // clean up on load
+    window.addEventListener('load', ()=>{ // set initial focus
+      pwdInput.focus();
+    });
+
+  </script>
+</body>
+</html>
